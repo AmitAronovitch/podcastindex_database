@@ -32,5 +32,58 @@ Most of the field names are obvious.  But, for clarity, here are the meanings of
              set manually or through automated popularity discovery.
 * detected_language - Not used yet.
 
+# podcastindex_db - Helper for downloading and Manipulating a local sqlite3 index
+
+## Install using docker
+
+For bash shell, create the following alias
+```bash
+alias podcastindex_db='docker run --rm -it --user $(id -u):$(id -g) -v /tmp:/tmp -v ${PWD}:/data amitar/podcastindex_db'
+```
+(to make this alias permanent, you can add that line to the relevant file, depending on your distro. Usually that is either ~/.bash_aliases or ~/.bashrc)
+
+Now, when you type `podcastindex_db` for the first time, it will download the image from dockerhub, and display the commandline help.
+
+## Usage
+
+1. Go to the directory where you want to store the database
+```bash
+mkdir pi_data
+cd pi_data
+```
+
+2. Download and extract the database
+```bash
+podcastindex_db download
+podcastindex_db unpack-db
+```
+(use `podcastindex_db download --help` and `podcastindex_db unpack-db --help` to see more options. This is useful if you are
+storing multiple versions of the db, or resetting the live db by unpacking from the saved backup).
+
+3. Create a full-text-search index.
+```
+podcastindex_db setup-fts
+```
+The default indexes the `title` and `description` fields only, but if you intend to search other fields
+you need to specify them using (possibly multiple) `--fields` parameters (see `podcastindex_db setup-fts --help` for more options).
+
+4. Search...
+```bash
+~$ podcastindex_db search --fields title "100 retro live"
+(4578888, '9a5c8e19-3c5e-534e-a2a2-378c740c8a2e', 'Podcasts Live – La Caz Retro – Le Podcast 100% retrogaming')
+(5718023, '27293ad7-c199-5047-8135-a864fb546492', '100% Retro - Live 24/7')
+(6367704, '27293ad7-c199-5047-8135-a864fb546491', '100% Retro - Live 24/7 (MegaCRON!)')
+
+~$ podcastindex_db search --out-fields id --out-fields title --out-fields itunesAuthor --fields title "podcasting 2 0" 
+(41423, 'Podcasting “StranieroVision “ &amp; “Radio Guaglione!”', 'The Straniero')
+(199493, "Podcasting Ain't Easy 2.0", 'Merick Studios')
+(920666, 'Podcasting 2.0', 'Podcast Index LLC')
+(1067279, 'face for podcasting', 'Steven Mandzk')
+(1370495, 'podCast411 -  Learn about Podcasting and Podcasters - The Podcast 2.0 feed', 'Rob @ podcast411 covering podcasters and podcasting news')
+(2372494, 'DecimoA - Podcasting Limited', 'DecimoA - Podcasting Limited S')
+(2972343, 'Rochester Prep High School HS 2.0: Podcasting', 'Rochester Prep High School HS 2.0: Podcasting')
+(4162593, 'The Future of Podcasting', 'Dave Jackson & Daniel J. Lewis')
+(5790180, 'Podcasting and the Blockchain', 'Jennifer Navarrete')
+```
 
 Everything in this repo is under the [MIT](https://opensource.org/licenses/MIT) license.
